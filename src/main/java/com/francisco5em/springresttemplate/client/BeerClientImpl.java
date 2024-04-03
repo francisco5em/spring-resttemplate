@@ -7,6 +7,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,8 @@ import org.apache.hc.client5.*;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -107,7 +110,7 @@ public class BeerClientImpl implements BeerClient {
     }
 
     @Override
-    public BeerDTO patchBeer(BeerDTO beerDto) {
+    public BeerDTO patchBeer(@Value("${rest.template.rootUrl}") String rootURL, BeerDTO beerDto) {
         RestTemplate restTemplate = restTemplateBuilder.build();
 
         HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(
@@ -115,10 +118,14 @@ public class BeerClientImpl implements BeerClient {
         
         restTemplate.setRequestFactory(requestFactory);
         
-        // URI uri = restTemplate.postForLocation(, beerDto);
+        URI uri=UriComponentsBuilder.fromPath(GET_BEER_BY_ID_PATH)
+                .build(beerDto.getId());
+         //URI uri = restTemplate.postForLocation(GET_BEER_BY_ID_PATH, beerDto);
         //GET_BEER_BY_ID_PATH
+         
+         restTemplate.patchForObject(uri, beerDto, BeerDTO.class);
         
-        restTemplate.patchForObject(GET_BEER_PATH+"/"+beerDto.getId(), beerDto, BeerDTO.class);
+        //restTemplate.patchForObject(GET_BEER_PATH+"/"+beerDto.getId(), beerDto, BeerDTO.class);
 
         return getBeerById(beerDto.getId());
 

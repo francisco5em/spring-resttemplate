@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.web.client.HttpClientErrorException;
@@ -117,7 +118,6 @@ class BeerClientImplTest {
         assertNotNull(byId);
 
     }
-    
 
     /**
      * Test method for creating a beer using:
@@ -132,13 +132,12 @@ class BeerClientImplTest {
         BeerDTO savedDto = beerClient.createBeer(newDto);
 
         assertNotNull(savedDto);
-        
+
         BeerDTO byId = beerClient.getBeerById(savedDto.getId());
         assertThatObject(byId).isEqualTo(savedDto);
-        
-        
+
     }
-    
+
     /**
      * Test method for updating an specific beer by an UUID using:
      * {@link com.francisco5em.springresttemplate.client.BeerClientImpl#updateBeer(BeerDTO)))}.
@@ -146,13 +145,8 @@ class BeerClientImplTest {
     @Test
     void testUpdateBeer() {
 
-        BeerDTO newDto = BeerDTO.builder()
-                .price(new BigDecimal("10.99"))
-                .beerName("Mango Bobs 2")
-                .beerStyle(BeerStyle.IPA)
-                .quantityOnHand(500)
-                .upc("123245")
-                .build();
+        BeerDTO newDto = BeerDTO.builder().price(new BigDecimal("10.99")).beerName("Mango Bobs 2")
+                .beerStyle(BeerStyle.IPA).quantityOnHand(500).upc("123245").build();
 
         BeerDTO beerDto = beerClient.createBeer(newDto);
 
@@ -162,30 +156,24 @@ class BeerClientImplTest {
 
         assertEquals(newName, updatedBeer.getBeerName());
     }
-    
+
     /**
      * Test method for patching an specific beer by an UUID using:
      * {@link com.francisco5em.springresttemplate.client.BeerClientImpl#patchBeer(BeerDTO)))}.
      */
     @Test
     void testPatchBeer() {
-        BeerDTO newDto = BeerDTO.builder()
-                .price(new BigDecimal("10.99"))
-                .beerName("Mango Bobs 2")
-                .beerStyle(BeerStyle.IPA)
-                .quantityOnHand(500)
-                .upc("123245")
-                .build();
-
+        BeerDTO newDto = BeerDTO.builder().price(new BigDecimal("10.99")).beerName("Mango Bobs 2")
+                .beerStyle(BeerStyle.IPA).quantityOnHand(500).upc("123245").build();
 
         BeerDTO beerDto = beerClient.createBeer(newDto);
 
         beerDto.setBeerStyle(BeerStyle.IPA);
         beerDto.setQuantityOnHand(50);
-        BeerDTO updatedBeer = beerClient.patchBeer(beerDto);
+        BeerDTO updatedBeer = beerClient.patchBeer(BeerClientMockTest.HOST_URL,beerDto);
 
         assertEquals(BeerStyle.IPA, updatedBeer.getBeerStyle());
-        assertEquals(50,updatedBeer.getQuantityOnHand());
+        assertEquals(50, updatedBeer.getQuantityOnHand());
     }
 
     /**
@@ -194,20 +182,15 @@ class BeerClientImplTest {
      */
     @Test
     void testDeleteBeer() {
-        BeerDTO newDto = BeerDTO.builder()
-                .price(new BigDecimal("10.99"))
-                .beerName("Mango Bobs 2")
-                .beerStyle(BeerStyle.IPA)
-                .quantityOnHand(500)
-                .upc("123245")
-                .build();
+        BeerDTO newDto = BeerDTO.builder().price(new BigDecimal("10.99")).beerName("Mango Bobs 2")
+                .beerStyle(BeerStyle.IPA).quantityOnHand(500).upc("123245").build();
 
         BeerDTO beerDto = beerClient.createBeer(newDto);
 
         beerClient.deleteBeer(beerDto.getId());
 
         assertThrows(HttpClientErrorException.class, () -> {
-            //should error
+            // should error
             beerClient.getBeerById(beerDto.getId());
         });
     }
